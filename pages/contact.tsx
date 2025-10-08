@@ -3,20 +3,20 @@ import Layout from "../components/layout/Layout";
 
 export default function Contact() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 py-10 md:py-16 flex items-center justify-center">
+    <div className="min-h-screen bg-white py-10 md:py-16 flex items-center justify-center">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center text-white mb-8 md:mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg">
+        <div className="text-center text-gray-900 mb-8 md:mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Contact Us
           </h1>
-          <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
             Have questions or want to collaborate? Fill out the form below and our team will reach out shortly.
           </p>
         </div>
 
         {/* Zoho Form */}
-        <div className="max-w-3xl mx-auto bg-black/60 backdrop-blur-md rounded-3xl shadow-2xl border border-white/10 overflow-hidden">
+        <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-2xl border border-gray-200 overflow-hidden">
           <iframe
             aria-label="Contact Us"
             src="https://forms.zohopublic.in/himanshumawri2899gm1/form/ContactUs/formperma/WNqtt5pyaZxff0g3toL--P1IHAoYsrMDdcskMbfZZfk"
@@ -33,12 +33,12 @@ export default function Contact() {
         </div>
 
         {/* Optional footer */}
-        <div className="text-center mt-8 text-white/80 text-sm">
+        <div className="text-center mt-8 text-gray-600 text-sm">
           <p>
             Prefer to reach out directly?{" "}
             <a
               href="mailto:sales@gozupees.com"
-              className="text-white font-medium underline hover:text-gray-200"
+              className="text-blue-600 font-medium underline hover:text-blue-800"
             >
               sales@gozupees.com
             </a>
