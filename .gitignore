@@ -65,3 +65,7 @@ temp/
 # Optional IDE specific
 *.iml
 *.idea/
+
+# Semgrep
+.semgrep/
+.config/.semgrep/
