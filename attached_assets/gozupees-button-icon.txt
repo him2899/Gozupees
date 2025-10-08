@@ -1,0 +1,24 @@
+Desktop Version:
+
+Gradient: from-blue-500 to-purple-500 (hover: from-blue-600 to-purple-600)
+Text: text-white font-medium
+Padding: px-4 py-2
+Border Radius: rounded-md
+Shadow: shadow-lg
+Transition: transition-all duration-300
+Display: flex items-center gap-2
+Icon: ArrowUpRight icon with h-4 w-4
+Mobile Version (in menu):
+
+Gradient: Same from-blue-500 to-purple-500 (hover: from-blue-600 to-purple-600)
+Text: text-white font-medium
+Width: w-full
+Display: flex items-center justify-center gap-2
+Icon: Same ArrowUpRight icon with h-4 w-4
+Complete CSS classes:
+
+/* Desktop */
+bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-medium px-4 py-2 rounded-md shadow-lg transition-all duration-300 flex items-center gap-2
+/* Mobile */
+w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-medium flex items-center justify-center gap-2
+The button uses a blue-to-purple gradient that darkens on hover, with medium font weight, standard padding, rounded corners, and includes an arrow icon.

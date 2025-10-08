@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# Disallow crawling of API routes and internal pages
+Disallow: /api/
+Disallow: /_next/
+Disallow: /admin/
+
+# Allow all search engines to crawl the site
+Crawl-delay: 1
+
+# Sitemap locations
+Sitemap: https://gozupees.com/sitemap.xml
+Sitemap: https://gozupees.com/sitemap-index.xml
+
+# Additional sitemaps (if you create more specific ones in the future)
+# Sitemap: https://gozupees.com/blog-sitemap.xml
+# Sitemap: https://gozupees.com/product-sitemap.xml

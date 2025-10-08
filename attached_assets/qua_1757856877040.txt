@@ -1,0 +1,39 @@
+1. Integration & Compatibility
+
+“How easily will this agent integrate with our existing systems — CRM (Salesforce, Dynamics), billing (Netcracker, Amdocs), ticketing (JIRA, ServiceNow), contact centre platforms (Genesys, Avaya, Twilio)?”
+
+2. Security & Compliance
+
+“Can this agent handle sensitive data safely, meeting GDPR, FCA, ISO27001, or industry-specific regulations (telecom, finance, healthcare)? How is data stored, logged, or redacted?”
+
+3. Customer Experience Impact
+
+“Will customers feel like they’re speaking with a real, competent service rep — or will this damage our brand if it sounds robotic or unhelpful?”
+
+4. Agent Escalation & Coverage
+
+“What happens when the AI can’t resolve an issue? Does it gracefully escalate with context, or create dead ends? What % of issues can it realistically resolve end-to-end?”
+
+5. Operational ROI
+
+“What measurable savings or revenue uplift will we see? Fewer live-agent hours? Faster resolution? Higher conversion rates? Better NPS or CSAT?”
+
+6. Training & Customisation
+
+“How quickly can the agent be trained on our knowledge base, SOPs, policies, and tone of voice? Do we need AI engineers to maintain it, or can our own ops teams update it?”
+
+7. Scalability & Performance
+
+“Can this scale to thousands of concurrent calls without latency or downtime? What’s the SLA for uptime and response times?”
+
+8. Language & Localisation
+
+“Does the agent handle multiple languages, dialects, and accents with natural accuracy? Can it adapt for regional compliance and customer expectations?”
+
+9. Analytics & Oversight
+
+“How do we measure performance? Do we get dashboards with resolution rates, cost savings, customer sentiment, missed intents, and escalation trends?”
+
+10. Vendor Lock-In & Roadmap
+
+“If we commit, are we tied to GoZupees forever? Can this sit in our own cloud? What’s your roadmap for future capabilities (multi-agent orchestration, voice+chat blending, proactive outbound)?”

@@ -1,0 +1,29 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="transferGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10B981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#transferGrad)"/>
+  
+  <!-- Phone icons -->
+  <rect x="80" y="120" width="50" height="60" rx="8" fill="white" fill-opacity="0.9"/>
+  <circle cx="105" cy="140" r="8" fill="#10B981"/>
+  <rect x="95" y="155" width="20" height="4" fill="#10B981"/>
+  
+  <rect x="270" y="120" width="50" height="60" rx="8" fill="white" fill-opacity="0.9"/>
+  <circle cx="295" cy="140" r="8" fill="#10B981"/>
+  <rect x="285" y="155" width="20" height="4" fill="#10B981"/>
+  
+  <!-- Transfer arrow -->
+  <path d="M150 140 Q200 120 250 140" stroke="white" stroke-width="3" fill="none"/>
+  <path d="M240 135 L250 140 L240 145" fill="white"/>
+  
+  <!-- Person icons -->
+  <circle cx="105" cy="90" r="12" fill="white"/>
+  <circle cx="295" cy="90" r="12" fill="white"/>
+  
+  <text x="200" y="220" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="600" text-anchor="middle">Smart Call Transfers</text>
+  <text x="200" y="240" fill="white" font-family="Arial, sans-serif" font-size="12" fill-opacity="0.9" text-anchor="middle">Seamless routing to the right person</text>
+</svg>

@@ -1,0 +1,1063 @@
+import React, { useState, useEffect, useRef } from "react";
+import { ReactElement } from 'react';
+import Layout from '../../components/layout/Layout';
+import { motion } from "framer-motion";
+import {
+  Phone,
+  MessageSquare,
+  Mail,
+  Smartphone,
+  Calendar,
+  Clock,
+  Users,
+  Shield,
+  CheckCircle,
+  X,
+  Play,
+  Headphones,
+  Globe,
+  Building,
+  FileText,
+  BarChart3,
+  Zap,
+  Lock,
+  Award,
+  PhoneCall,
+  Server,
+  Wifi,
+  Database,
+  AlertCircle,
+  CreditCard,
+  Settings,
+  UserCheck,
+  Router,
+  ArrowRight,
+  Star,
+  Sparkles,
+} from "lucide-react";
+
+export default function DemoAllInOneAgent() {
+  const [isVapiLoaded, setIsVapiLoaded] = useState(false);
+  const [vapi, setVapi] = useState<any>(null);
+  const [isCallActive, setIsCallActive] = useState(false);
+  const [callStatus, setCallStatus] = useState("");
+  const [transcript, setTranscript] = useState<
+    Array<{ role: string; text: string; timestamp: Date }>
+  >([]);
+  const [showCallModal, setShowCallModal] = useState(false);
+  const [currentUserSpeech, setCurrentUserSpeech] = useState("");
+  const [currentAssistantSpeech, setCurrentAssistantSpeech] = useState("");
+  const transcriptEndRef = useRef<HTMLDivElement>(null);
+  const speechBufferRef = useRef({
+    user: "",
+    assistant: "",
+    isSpeaking: false,
+    role: "",
+  });
+
+  useEffect(() => {
+    // Load VAPI SDK
+    const loadVapi = async () => {
+      try {
+        const { default: Vapi } = await import("@vapi-ai/web");
+        const vapiInstance = new Vapi("66034320-83fe-4da0-acb9-9df12b5a6636");
+
+        // Set up event listeners
+        vapiInstance.on("call-start", () => {
+          setCallStatus("Connected");
+          setTranscript([
+            {
+              role: "system",
+              text: "Call connected - start speaking!",
+              timestamp: new Date(),
+            },
+          ]);
+        });
+
+        vapiInstance.on("call-end", () => {
+          setIsCallActive(false);
+          setCallStatus("Call ended");
+          if (currentUserSpeech.trim()) {
+            setTranscript((prev) => [
+              ...prev,
+              {
+                role: "user",
+                text: currentUserSpeech.trim(),
+                timestamp: new Date(),
+              },
+            ]);
+          }
+          if (currentAssistantSpeech.trim()) {
+            setTranscript((prev) => [
+              ...prev,
+              {
+                role: "assistant",
+                text: currentAssistantSpeech.trim(),
+                timestamp: new Date(),
+              },
+            ]);
+          }
+          setCurrentUserSpeech("");
+          setCurrentAssistantSpeech("");
+          setTimeout(() => setShowCallModal(false), 3000);
+        });
+
+        vapiInstance.on("speech-start", () => {
+          setCallStatus("Listening...");
+          speechBufferRef.current.isSpeaking = true;
+        });
+
+        vapiInstance.on("speech-end", () => {
+          setCallStatus("Processing...");
+          speechBufferRef.current.isSpeaking = false;
+
+          const role = speechBufferRef.current.role;
+          if (role === "user" && speechBufferRef.current.user.trim()) {
+            setTranscript((prev) => [
+              ...prev,
+              {
+                role: "user",
+                text: speechBufferRef.current.user.trim(),
+                timestamp: new Date(),
+              },
+            ]);
+            speechBufferRef.current.user = "";
+            setCurrentUserSpeech("");
+          } else if (
+            role === "assistant" &&
+            speechBufferRef.current.assistant.trim()
+          ) {
+            setTranscript((prev) => [
+              ...prev,
+              {
+                role: "assistant",
+                text: speechBufferRef.current.assistant.trim(),
+                timestamp: new Date(),
+              },
+            ]);
+            speechBufferRef.current.assistant = "";
+            setCurrentAssistantSpeech("");
+          }
+        });
+
+        vapiInstance.on("message", (message: any) => {
+          console.log("VAPI Message:", message);
+
+          if (message.type === "transcript" && message.transcript) {
+            const isUser = message.role === "user";
+            const isAssistant = message.role === "assistant";
+
+            // Update the role in the buffer when we detect it
+            if (isUser || isAssistant) {
+              speechBufferRef.current.role = message.role;
+            }
+
+            if (speechBufferRef.current.isSpeaking) {
+              if (isUser) {
+                speechBufferRef.current.user = message.transcript;
+                setCurrentUserSpeech(message.transcript);
+              } else if (isAssistant) {
+                speechBufferRef.current.assistant = message.transcript;
+                setCurrentAssistantSpeech(message.transcript);
+              }
+            }
+          }
+        });
+
+        vapiInstance.on("error", (error: any) => {
+          console.error("VAPI Error:", error);
+          setCallStatus("Error: " + (error.message || "Connection failed"));
+          setIsCallActive(false);
+        });
+
+        setVapi(vapiInstance);
+        setIsVapiLoaded(true);
+        console.log("VAPI SDK loaded successfully");
+      } catch (error) {
+        console.error("Failed to load VAPI:", error);
+        setCallStatus("Failed to load voice system");
+      }
+    };
+
+    loadVapi();
+  }, []);
+
+  useEffect(() => {
+    transcriptEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [transcript]);
+
+  const startVapiCall = () => {
+    console.log("Starting VAPI call...");
+    console.log("VAPI loaded:", isVapiLoaded);
+    console.log("VAPI instance:", vapi);
+
+    if (vapi && isVapiLoaded) {
+      setTranscript([]);
+      setCurrentUserSpeech("");
+      setCurrentAssistantSpeech("");
+      speechBufferRef.current = {
+        user: "",
+        assistant: "",
+        isSpeaking: false,
+        role: "",
+      };
+      setCallStatus("Connecting...");
+      setShowCallModal(true);
+      setIsCallActive(true);
+
+      try {
+        console.log(
+          "Starting VAPI with agent ID:",
+          "b0f6d2b2-61e2-4b66-99f2-03524c35e9ea",
+        );
+        vapi.start("b0f6d2b2-61e2-4b66-99f2-03524c35e9ea");
+      } catch (error) {
+        console.error("Error starting VAPI call:", error);
+        setCallStatus(
+          "Error: " +
+            (error instanceof Error ? error.message : "Unknown error"),
+        );
+      }
+    } else {
+      console.error("VAPI not loaded or instance not available");
+      setCallStatus("VAPI not ready");
+    }
+  };
+
+  const endCall = () => {
+    if (vapi && isCallActive) {
+      speechBufferRef.current = {
+        user: "",
+        assistant: "",
+        isSpeaking: false,
+        role: "",
+      };
+      vapi.stop();
+    }
+  };
+
+  const seraCapabilities = [
+    {
+      icon: UserCheck,
+      title: "Complete Account Access",
+      description:
+        "Instantly access and understand your full Vodafone business account history, current services, and contract details",
+    },
+    {
+      icon: CreditCard,
+      title: "Billing & Payments",
+      description:
+        "Resolve billing issues, explain charges in detail, and arrange payment plans or process payments securely",
+    },
+    {
+      icon: Router,
+      title: "Technical Support",
+      description:
+        "Handle broadband faults, connectivity dropouts, router diagnostics, and network troubleshooting",
+    },
+    {
+      icon: FileText,
+      title: "Contract Management",
+      description:
+        "Manage contract details, process upgrades, handle cancellations, and compare plan options",
+    },
+    {
+      icon: Settings,
+      title: "Installation & Setup",
+      description:
+        "Guide through installations, router configuration, line testing, and porting number transfers",
+    },
+    {
+      icon: Users,
+      title: "Smart Escalation",
+      description:
+        "Only escalates to specialists when you specifically ask - otherwise handles everything end-to-end",
+    },
+  ];
+
+  const keyFeatures = [
+    {
+      icon: Sparkles,
+      title: "Emotionally Intelligent",
+      description:
+        "Natural human conversation rhythm with empathy and understanding",
+      color: "from-purple-500 to-pink-500",
+    },
+    {
+      icon: Database,
+      title: "Deep Telecom Knowledge",
+      description:
+        "Trained extensively on Vodafone business products and services",
+      color: "from-blue-500 to-cyan-500",
+    },
+    {
+      icon: Clock,
+      title: "Conversation Memory",
+      description:
+        "Remembers context from earlier in the conversation - never makes you repeat yourself",
+      color: "from-green-500 to-emerald-500",
+    },
+    {
+      icon: Shield,
+      title: "Full Ownership",
+      description:
+        "Takes complete responsibility for resolving your issue from start to finish",
+      color: "from-red-500 to-orange-500",
+    },
+  ];
+
+  const businessBenefits = [
+    {
+      title: "Zero Hold Times",
+      description: "Customers connect instantly to intelligent support",
+      metric: "100% immediate response",
+    },
+    {
+      title: "First-Call Resolution",
+      description: "Most issues resolved without transfers or callbacks",
+      metric: "85% FCR rate",
+    },
+    {
+      title: "24/7 Availability",
+      description: "Full support coverage outside business hours",
+      metric: "365 days a year",
+    },
+    {
+      title: "Cost Reduction",
+      description:
+        "Significantly lower operational costs than traditional support",
+      metric: "60% cost savings",
+    },
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+        {/* Hero Section */}
+        <section className="relative py-16 lg:min-h-screen lg:h-screen flex items-center justify-center overflow-hidden bg-gray-900 text-white">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-900/20 via-purple-900/20 to-cyan-900/20"></div>
+          <div className="absolute top-0 left-0 w-full h-full">
+            <div className="absolute top-20 left-10 w-32 h-32 bg-blue-500/10 rounded-full blur-xl"></div>
+            <div className="absolute top-40 right-20 w-48 h-48 bg-purple-500/10 rounded-full blur-xl"></div>
+            <div className="absolute bottom-20 left-1/3 w-40 h-40 bg-cyan-500/10 rounded-full blur-xl"></div>
+          </div>
+
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="max-w-7xl mx-auto">
+              <div className="grid lg:grid-cols-2 gap-12 items-stretch">
+                <div className="flex flex-col justify-center">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                    className="mb-6"
+                  >
+                    <span className="inline-flex items-center px-4 py-2 bg-blue-500/20 rounded-full text-blue-300 text-sm font-medium border border-blue-500/30">
+                      <Building className="w-4 h-4 mr-2" />
+                      Prodapt X Vodafone UK
+                    </span>
+                  </motion.div>
+
+                  <motion.h1
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2, duration: 0.8 }}
+                    className="text-4xl md:text-5xl lg:text-7xl font-bold mb-6 leading-tight"
+                  >
+                    Meet{" "}
+                    <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                      Sera
+                    </span>
+                  </motion.h1>
+
+                  <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4, duration: 0.8 }}
+                    className="text-xl md:text-2xl lg:text-3xl text-gray-200 mb-8 font-light"
+                  >
+                    Your All-in-One Vodafone UK Business Voice Agent
+                  </motion.p>
+
+                  <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6, duration: 0.8 }}
+                    className="text-xl text-gray-300 mb-8 max-w-2xl leading-relaxed"
+                  >
+                    The fully capable, emotionally intelligent voice assistant
+                    that's your first and final stop for any issue, question, or
+                    change you need.
+                  </motion.p>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.8, duration: 0.8 }}
+                    className="flex flex-col sm:flex-row gap-4"
+                  >
+                    <a
+                      href="#talk-to-sera"
+                      className="bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 hover:from-blue-700 hover:via-purple-700 hover:to-cyan-700 text-white px-6 lg:px-8 py-3 lg:py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 text-base lg:text-lg"
+                    >
+                      <PhoneCall className="w-5 h-5 lg:w-6 lg:h-6" />
+                      <span>Talk Live to Sera</span>
+                    </a>
+
+                    <a
+                      href="#capabilities"
+                      className="border-2 border-white/20 text-white px-6 lg:px-8 py-3 lg:py-4 rounded-xl font-semibold hover:bg-white/10 transition-all duration-300 flex items-center justify-center space-x-2 text-base lg:text-lg backdrop-blur-sm"
+                    >
+                      <span>Explore Capabilities</span>
+                      <ArrowRight className="w-5 h-5 lg:w-6 lg:h-6" />
+                    </a>
+                  </motion.div>
+                </div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1, duration: 0.8 }}
+                  className="relative h-full flex items-end justify-center"
+                >
+                  <motion.img
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 1.2, duration: 0.8 }}
+                    src="/sera-vodafone-portrait.png"
+                    alt="Sera - AI Vodafone Business Voice Agent"
+                    className="w-full max-w-md h-auto block"
+                    style={{
+                      display: "block",
+                      verticalAlign: "bottom",
+                      lineHeight: 0,
+                      marginBottom: 0,
+                      paddingBottom: 0,
+                    }}
+                  />
+                </motion.div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Demo Section */}
+        <section id="talk-to-sera" className="py-8 lg:py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Experience Sera Live
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Test Sera's comprehensive business support capabilities. Call
+                our demo line or start a conversation in your browser.
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-6 lg:items-stretch">
+              {/* Phone Demo */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8 }}
+                viewport={{ once: true }}
+                className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-4 lg:p-6 flex flex-col justify-between min-h-[500px] lg:min-h-[580px]"
+              >
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
+                    <Phone className="w-8 h-8 text-blue-600" />
+                    Call Sera Now
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Experience Sera's full capabilities by calling our demo
+                    line. Test her knowledge of business services and support
+                    processes.
+                  </p>
+                  <div className="bg-blue-50 rounded-lg p-4 mb-6">
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      What Sera Handles:
+                    </h4>
+                    <ul className="text-sm text-gray-700 space-y-1">
+                      <li>• Complete account access and history</li>
+                      <li>• Billing questions and payment processing</li>
+                      <li>• Technical support and troubleshooting</li>
+                      <li>• Contract changes and upgrades</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="flex-1 flex flex-col justify-center space-y-4">
+                  <div className="bg-white rounded-xl p-4 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">🇬🇧</span>
+                        <div>
+                          <p className="font-semibold text-gray-900">
+                            UK Demo Line
+                          </p>
+                          <p className="text-blue-600 font-mono text-sm">
+                            +44 (114) 697 4660
+                          </p>
+                        </div>
+                      </div>
+                      <a
+                        href="tel:+441146974660"
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                      >
+                        Call
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="bg-white/70 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Clock className="w-4 h-4 text-gray-500" />
+                      <span className="text-sm font-medium text-gray-700">
+                        Available 24/7
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-600">
+                      Instant connection • No wait times • Free demo calls
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Visual Demo */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                viewport={{ once: true }}
+                className="flex items-center justify-center py-8 lg:py-0 order-first lg:order-none min-h-[500px] lg:min-h-[580px]"
+              >
+                <img
+                  src="/sera-vodafone-mobile.png"
+                  alt="Sera mobile interface demonstration"
+                  className="h-[300px] lg:h-[400px] w-auto object-contain drop-shadow-2xl"
+                />
+              </motion.div>
+
+              {/* Browser Demo */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8 }}
+                viewport={{ once: true }}
+                className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-4 lg:p-6 flex flex-col justify-between min-h-[500px] lg:min-h-[580px]"
+              >
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
+                    <Headphones className="w-8 h-8 text-green-600" />
+                    Browser Demo
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Start a live conversation with Sera directly in your
+                    browser. Test her business knowledge and support
+                    capabilities.
+                  </p>
+                  <div className="bg-green-50 rounded-lg p-4 mb-6">
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      Demo Features:
+                    </h4>
+                    <ul className="text-sm text-gray-700 space-y-1">
+                      <li>• Real-time voice conversation</li>
+                      <li>• Vodafone business knowledge</li>
+                      <li>• Account simulation</li>
+                      <li>• Natural language processing</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="flex-1 flex flex-col justify-center">
+                  <div className="space-y-4">
+                    <button
+                      onClick={startVapiCall}
+                      disabled={!isVapiLoaded}
+                      className="w-full bg-green-600 text-white px-4 lg:px-8 py-3 lg:py-4 rounded-xl font-semibold hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 lg:gap-3 text-base lg:text-lg"
+                    >
+                      <Play className="w-5 h-5 lg:w-6 lg:h-6" />
+                      {isVapiLoaded ? "Start Voice Call" : "Loading..."}
+                    </button>
+
+                    <button className="w-full border-2 border-green-600 text-green-600 px-4 lg:px-8 py-3 lg:py-4 rounded-xl font-semibold hover:bg-green-50 transition-colors flex items-center justify-center gap-2 lg:gap-3 text-base lg:text-lg">
+                      <MessageSquare className="w-5 h-5 lg:w-6 lg:h-6" />
+                      Text Chat Demo
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* AI Management Dashboard Section */}
+        <section className="py-16 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Vodafone AI Agent Management Dashboard
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+                Comprehensive oversight and control of your AI-powered business
+                support system with real-time analytics and performance
+                insights.
+              </p>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                viewport={{ once: true }}
+              >
+                <a
+                  href="https://vodafone-prodapt.zupees.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 hover:from-blue-700 hover:via-purple-700 hover:to-cyan-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
+                >
+                  <BarChart3 className="w-5 h-5" />
+                  View Interactive Dashboard
+                </a>
+              </motion.div>
+            </motion.div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8 }}
+                viewport={{ once: true }}
+                className="space-y-6"
+              >
+                <div className="bg-white rounded-xl p-6 shadow-sm">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="bg-blue-100 p-3 rounded-lg">
+                      <BarChart3 className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Real-Time Analytics
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Monitor call volumes, resolution rates, and customer
+                        satisfaction
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl p-6 shadow-sm">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="bg-purple-100 p-3 rounded-lg">
+                      <Settings className="w-6 h-6 text-purple-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Agent Configuration
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Customize responses, escalation rules, and business
+                        logic
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl p-6 shadow-sm">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="bg-green-100 p-3 rounded-lg">
+                      <Shield className="w-6 h-6 text-green-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Security & Compliance
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        GDPR compliance, audit trails, and data protection
+                        controls
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                id="dashboard-demo"
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                viewport={{ once: true }}
+                className="bg-white rounded-2xl p-8 shadow-lg"
+              >
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-lg font-semibold text-gray-900">
+                      Live Performance Metrics
+                    </h4>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                      <span className="text-sm text-gray-600">Active</span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-blue-50 rounded-lg p-4">
+                      <div className="text-2xl font-bold text-blue-600">
+                        847
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Calls Handled Today
+                      </div>
+                    </div>
+                    <div className="bg-purple-50 rounded-lg p-4">
+                      <div className="text-2xl font-bold text-purple-600">
+                        94%
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Resolution Rate
+                      </div>
+                    </div>
+                    <div className="bg-green-50 rounded-lg p-4">
+                      <div className="text-2xl font-bold text-green-600">
+                        2.3s
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Avg Response Time
+                      </div>
+                    </div>
+                    <div className="bg-orange-50 rounded-lg p-4">
+                      <div className="text-2xl font-bold text-orange-600">
+                        4.8
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Customer Rating
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-4">
+                    <h5 className="text-sm font-medium text-gray-900 mb-2">
+                      Top Handled Queries
+                    </h5>
+                    <div className="space-y-2">
+                      {[
+                        { query: "Account Balance & Billing", percentage: 32 },
+                        { query: "Technical Support", percentage: 28 },
+                        { query: "Service Upgrades", percentage: 21 },
+                        { query: "Contract Changes", percentage: 19 },
+                      ].map((item, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between"
+                        >
+                          <span className="text-sm text-gray-600">
+                            {item.query}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 bg-gray-200 rounded-full h-2">
+                              <div
+                                className="bg-blue-600 h-2 rounded-full"
+                                style={{ width: `${item.percentage}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-sm font-medium text-gray-900">
+                              {item.percentage}%
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* Capabilities Section */}
+        <section id="capabilities" className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Sera's Complete Business Support
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Trained with deep telecom knowledge and natural human rhythm,
+                Sera handles everything your business needs.
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {seraCapabilities.map((capability, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="bg-blue-100 p-3 rounded-lg">
+                      <capability.icon className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        {capability.title}
+                      </h3>
+                      <p className="text-gray-600 text-sm leading-relaxed">
+                        {capability.description}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Key Features Section */}
+        <section className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Why Sera is Different
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                She's not just a bot — she's your intelligent business partner
+                who never transfers, pauses, or makes you repeat yourself.
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {keyFeatures.map((feature, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 hover:shadow-lg transition-shadow"
+                >
+                  <div
+                    className={`inline-flex p-3 rounded-lg bg-gradient-to-r ${feature.color} mb-4`}
+                  >
+                    <feature.icon className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {feature.description}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Business Benefits Section */}
+        <section className="py-16 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Real Business Impact
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Transform your customer experience and operational efficiency
+                with Sera's comprehensive support.
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {businessBenefits.map((benefit, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  className="text-center bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <Star className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {benefit.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-3">
+                    {benefit.description}
+                  </p>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {benefit.metric}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Call to Action */}
+        <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="text-3xl font-bold mb-4">
+                Ready to Experience Sera?
+              </h2>
+              <p className="text-xl text-blue-100 mb-8">
+                Join the businesses already benefiting from comprehensive
+                AI-powered support.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <a
+                  href="#talk-to-sera"
+                  className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 text-lg"
+                >
+                  <PhoneCall className="w-6 h-6" />
+                  Try Demo Now
+                </a>
+                <a
+                  href="/contact"
+                  className="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/10 transition-colors flex items-center justify-center gap-2 text-lg"
+                >
+                  <Mail className="w-6 h-6" />
+                  Get Started
+                </a>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+      {/* Call Modal */}
+      {showCallModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl p-6 max-w-md w-full max-h-[80vh] overflow-y-auto"
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">
+                Live Call with Sera
+              </h3>
+              <button
+                onClick={() => setShowCallModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-6">
+              <div className="flex items-center justify-center space-x-4 mb-4">
+                <div
+                  className={`w-4 h-4 rounded-full ${isCallActive ? "bg-green-500 animate-pulse" : "bg-gray-300"}`}
+                ></div>
+                <span className="text-lg font-medium text-gray-700">
+                  {callStatus}
+                </span>
+              </div>
+
+              {isCallActive && (
+                <button
+                  onClick={endCall}
+                  className="w-full bg-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-red-700 transition-colors"
+                >
+                  End Call
+                </button>
+              )}
+            </div>
+
+            <div className="bg-gray-50 rounded-xl p-4 max-h-60 overflow-y-auto">
+              <h4 className="font-semibold text-gray-900 mb-3">Conversation</h4>
+              <div className="space-y-3">
+                {transcript.map((entry, index) => (
+                  <div
+                    key={index}
+                    className={`${entry.role === "user" ? "text-right" : "text-left"}`}
+                  >
+                    <div
+                      className={`inline-block p-2 rounded-lg text-sm ${
+                        entry.role === "user"
+                          ? "bg-blue-500 text-white"
+                          : entry.role === "assistant"
+                            ? "bg-green-500 text-white"
+                            : "bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      {entry.text}
+                    </div>
+                  </div>
+                ))}
+                {(currentUserSpeech || currentAssistantSpeech) && (
+                  <div
+                    className={`${currentUserSpeech ? "text-right" : "text-left"}`}
+                  >
+                    <div
+                      className={`inline-block p-2 rounded-lg text-sm opacity-70 ${
+                        currentUserSpeech
+                          ? "bg-blue-400 text-white"
+                          : "bg-green-400 text-white"
+                      }`}
+                    >
+                      {currentUserSpeech || currentAssistantSpeech}
+                    </div>
+                  </div>
+                )}
+                <div ref={transcriptEndRef} />
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+      </div>
+    </div>
+  );
+}
+
+DemoAllInOneAgent.getLayout = function getLayout(page: ReactElement) {
+  return (
+    <Layout
+      title="Sera - All-in-One Vodafone UK Business Voice Agent | Live Demo"
+      description="Meet Sera, the emotionally intelligent AI voice agent for Vodafone UK business customers. Handles billing, technical support, contracts, and more - all in one conversation. Try the live demo now."
+      canonical="https://gozupees.com/ai-voice-agents/business-support"
+      ogImage="https://gozupees.com/images/sera-business-agent.jpg"
+    >
+      {page}
+    </Layout>
+  );
+};

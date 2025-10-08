@@ -1,0 +1,33 @@
+/* Hermes landing page custom styles */
+
+/* Fix text contrast on light backgrounds */
+.hermes-section h2 {
+  color: #1a202c; /* dark gray for headings */
+}
+
+.hermes-section p {
+  color: #4a5568; /* medium gray for paragraph text */
+}
+
+.hermes-section.bg-white,
+.hermes-section .bg-white {
+  color: #1a202c; /* Dark gray text on white backgrounds */
+}
+
+.hermes-section.bg-gray-50,
+.hermes-section .bg-gray-50 {
+  color: #1a202c; /* Dark gray text on light gray backgrounds */
+}
+
+/* For gradients with light colors */
+.hermes-section.bg-gradient-to-r.from-blue-50,
+.hermes-section .bg-gradient-to-r.from-blue-50 {
+  color: #1a202c;
+}
+
+/* Keep dark backgrounds with light text */
+.hermes-section.bg-dark,
+.hermes-section.bg-gray-900,
+.hermes-section.bg-gradient-to-b.from-gray-900 {
+  color: #f7fafc; /* Light gray text on dark backgrounds */
+}
